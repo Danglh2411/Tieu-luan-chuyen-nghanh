@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_marginTop="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_marginLeft="20dp"
+       android:layout_marginTop="5dp"
+        android:layout_weight="7"
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+        <TextView
+            android:textColor="@color/colorPrimary"
+            android:id="@+id/txtNameLF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="Lê Hải Đăng"
+            android:textSize="24sp" />
+
+        <TextView
+            android:textStyle="italic"
+            android:layout_marginLeft="10dp"
+            android:text="01267039616"
+            android:textSize="16sp"
+            android:id="@+id/txtPhoneLF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="3"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+        <ImageButton
+            android:id="@+id/btnMoreLF"
+            android:background="@null"
+            android:src="@drawable/ic_eyes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -37,7 +37,9 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyARxZmq0btxFIGXSskSkvtCyKjmIYyG7x4" />
 
-        <activity android:name=".InforUserActivity"></activity>
+        <activity android:name=".InforUserActivity" />
+        <activity android:name=".FindFriendActivity" />
+        <activity android:name=".ListFriendActivity"></activity>
     </application>
 
 </manifest>

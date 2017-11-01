@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity
         AnhXa();
         mBtnLoginFacebook.setReadPermissions(Arrays.asList("public_profile"));
         SetLoginButton();
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -131,9 +132,16 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_infor) {
             // Handle the camera action
         } else if (id == R.id.nav_friend) {
+            startActivity(new Intent(this,ListFriendActivity.class));
+            finish();
 
         } else if (id == R.id.nav_friendrq) {
 
+        }else if(id==R.id.nav_findfriend){
+            Intent ituser1 = new Intent(MainActivity.this,FindFriendActivity.class);
+            ituser1.putExtra("userid1",idfb);
+            startActivity(ituser1);
+            finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -180,6 +188,7 @@ public class MainActivity extends AppCompatActivity
                     mTvInfo.setText(namefb);
                     //     mEmail.setText(email);
                     AddUser(urlAddUser);
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -216,6 +225,7 @@ public class MainActivity extends AppCompatActivity
             public void onSuccess(LoginResult loginResult) {
                 mBtnLoginFacebook.setVisibility(View.INVISIBLE);
                 layoutMap.setVisibility(View.VISIBLE);
+
                 Result();
                 SupportMapFragment mapFragment
                         = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap);
@@ -464,7 +474,7 @@ public class MainActivity extends AppCompatActivity
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
                         Log.d("AAA","Error:\n" +error.toString());
                     }
                 }

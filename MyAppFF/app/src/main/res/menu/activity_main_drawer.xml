@@ -11,13 +11,17 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="Bạn bè" />
         <item
+            android:id="@+id/nav_findfriend"
+            android:icon="@drawable/ic_search"
+            android:title="Tìm kiếm" />
+        <item
             android:id="@+id/nav_friendrq"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Yêu cầu kết bạn" />
 
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="">
         <menu>
             <item
                 android:id="@+id/nav_setting"
