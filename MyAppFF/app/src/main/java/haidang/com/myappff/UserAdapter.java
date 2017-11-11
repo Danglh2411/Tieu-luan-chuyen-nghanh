@@ -10,7 +10,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -18,9 +17,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by HaiDang_PC on 10/26/2017.
@@ -55,7 +52,7 @@ public class UserAdapter extends BaseAdapter{
     }
     private class ViewHolder{
         TextView txtName, txtPhone;
-        ImageButton imgbtnDetail;
+        ImageButton btnAddRQ;
     }
 
     @Override
@@ -68,7 +65,7 @@ public class UserAdapter extends BaseAdapter{
             view = inflater.inflate(layout,null);
             holder.txtName = (TextView) view.findViewById(R.id.txtName);
             holder.txtPhone = (TextView) view.findViewById(R.id.txtPhone);
-            holder.imgbtnDetail =(ImageButton) view.findViewById(R.id.btnDetail);
+            holder.btnAddRQ =(ImageButton) view.findViewById(R.id.btnDetail);
             view.setTag(holder);
         }else  {
             holder = (ViewHolder) view.getTag();
@@ -77,7 +74,7 @@ public class UserAdapter extends BaseAdapter{
         holder.txtName.setText(user.getName());
         holder.txtPhone.setText(user.getPhone());
         // Bat su kien cho btnXoa va btnSua
-        holder.imgbtnDetail.setOnClickListener(new    View.OnClickListener(){
+        holder.btnAddRQ.setOnClickListener(new    View.OnClickListener(){
             @Override
             public void onClick(View view){
                 userid2 = user.getId();
@@ -109,17 +106,7 @@ public class UserAdapter extends BaseAdapter{
                         Log.d("AAA","Error:\n" +error.toString());
                     }
                 }
-        ){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("Userid1","123457789");
-                params.put("Userid2",userid2);
-
-
-                return params;
-            }
-        };
+        );
         requestQueue.add(stringRequest);
     }
 }

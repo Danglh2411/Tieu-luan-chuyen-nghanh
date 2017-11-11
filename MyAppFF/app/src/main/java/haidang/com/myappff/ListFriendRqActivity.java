@@ -24,43 +24,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ListFriendActivity extends AppCompatActivity {
+public class ListFriendRqActivity extends AppCompatActivity {
 
-    String myurl ="https://apptimnhau.000webhostapp.com/listfriend.php";
+    String myurl ="https://apptimnhau.000webhostapp.com/getfriendrq.php";
     ListView lvuser;
-    ArrayList<Friend> arrayUser;
-    AdapterListFriend adapter;
+    ArrayList<FiendRq> arrayUser;
+    AdapterFriendRq adapter;
     ImageButton btnBack;
     String id;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_friend);
+        setContentView(R.layout.activity_list_friend_rq);
         Bundle bdLF = getIntent().getExtras();
         if(bdLF!=null){
             id = bdLF.getString("Userid");
-            //Toast.makeText(ListFriendActivity.this,id,Toast.LENGTH_LONG).show();
+            Toast.makeText(ListFriendRqActivity.this,id,Toast.LENGTH_LONG).show();
         }
-        lvuser = (ListView)findViewById(R.id.listFriend);
+        lvuser = (ListView)findViewById(R.id.listFriendRq);
         arrayUser = new ArrayList<>();
-        adapter = new AdapterListFriend(ListFriendActivity.this, R.layout.itemfriend,arrayUser);
+        adapter = new AdapterFriendRq(ListFriendRqActivity.this, R.layout.itemfriendrq,arrayUser);
         lvuser.setAdapter(adapter);
-        GetListFiend(myurl);
-        btnBack =(ImageButton) findViewById(R.id.btnBackLF);
+        GetListFiendRQ(myurl);
+        btnBack =(ImageButton) findViewById(R.id.btnBackFR);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ListFriendActivity.this,MainActivity.class));
-                finish();
+                startActivity(new Intent(ListFriendRqActivity.this,MainActivity.class));
 
             }
         });
+
     }
-    private void GetListFiend(String url  ){
-        RequestQueue requestQueue = Volley.newRequestQueue(ListFriendActivity.this);
+
+    private void GetListFiendRQ(String url  ){
+        RequestQueue requestQueue = Volley.newRequestQueue(ListFriendRqActivity.this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String  response) {
@@ -69,7 +69,7 @@ public class ListFriendActivity extends AppCompatActivity {
                         JSONObject jsonobject = new JSONObject(response);
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
                         JSONObject object = jsonarray.getJSONObject(i);
-                        arrayUser.add(new Friend(
+                        arrayUser.add(new FiendRq(
                                 object.getInt("Id"),
                                 object.getString("Userid1"),
                                 object.getString("NaUser1"),
@@ -86,7 +86,7 @@ public class ListFriendActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ListFriendActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                Toast.makeText(ListFriendRqActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
                 error.printStackTrace();
             }
         })

@@ -73,10 +73,16 @@ public class MainActivity extends AppCompatActivity
     private LoginButton mBtnLoginFacebook;
     private CallbackManager mCallbackManager;
     private ProfilePictureView profilePictureView;
-    CircleImageView iconmaker;
-    String namefb;
+    CircleImageView avtFB;
+
     String idfb;
-    String urlAddUser ="https://apptimnhau.000webhostapp.com/insert.php";
+    String namefb;
+    Double Lati;
+    Double Longi;
+
+    String urlAddUser = "https://apptimnhau.000webhostapp.com/insert.php";
+    String urlUpdateLocation = "https://apptimnhau.000webhostapp.com/updateLocation.php";
+    String urlInsertLocation = "https://apptimnhau.000webhostapp.com/insertLocation.php";
     private TextView mTvInfo;
     View layoutMap;
     private GoogleMap myMap;
@@ -96,7 +102,9 @@ public class MainActivity extends AppCompatActivity
         mCallbackManager = CallbackManager.Factory.create();
         AnhXa();
         mBtnLoginFacebook.setReadPermissions(Arrays.asList("public_profile"));
+        // Gọi sự kiện đăng nhập
         SetLoginButton();
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -132,17 +140,21 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_infor) {
             // Handle the camera action
         } else if (id == R.id.nav_friend) {
-            startActivity(new Intent(this,ListFriendActivity.class));
-            finish();
-
+            Intent mh = new Intent(MainActivity.this, ListFriendActivity.class);
+            mh.putExtra("Userid",idfb);
+            startActivity(mh);
+        } else if (id == R.id.nav_findfriend) {
+            Intent mhmain = new Intent(MainActivity.this, FindFriendActivity.class);
+            mhmain.putExtra("Userid",idfb);
+            mhmain.putExtra("NaUser",namefb);
+            startActivity(mhmain);
         } else if (id == R.id.nav_friendrq) {
+            Intent mhm = new Intent(MainActivity.this, ListFriendRqActivity.class);
+            mhm.putExtra("Userid",idfb);
+            startActivity(mhm);
 
-        }else if(id==R.id.nav_findfriend){
-            Intent ituser1 = new Intent(MainActivity.this,FindFriendActivity.class);
-            ituser1.putExtra("userid1",idfb);
-            startActivity(ituser1);
-            finish();
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -182,11 +194,13 @@ public class MainActivity extends AppCompatActivity
                 try {
 
                     namefb = object.getString("name");
-                    idfb =object.getString("id");
+                    idfb = object.getString("id");
                     profilePictureView.setProfileId(Profile.getCurrentProfile().getId());
                     //  iconmaker.setImageURI();
                     mTvInfo.setText(namefb);
                     //     mEmail.setText(email);
+                    //JSONObject JOSource = object.optJSONObject("cover");
+                    //coverPhoto = JOSource.getString("source");
                     AddUser(urlAddUser);
 
                 } catch (JSONException e) {
@@ -195,7 +209,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name");
+        parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large),cover");
         graphRequest.setParameters(parameters);
         graphRequest.executeAsync();
     }
@@ -216,6 +230,8 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
         mTvInfo = (TextView) header.findViewById(R.id.tv_name);
+
+        //avtFB = (CircleImageView) findViewById(R.id.avatarfb);
         profilePictureView = (ProfilePictureView) header.findViewById(R.id.imageProfilePicture);
     }
 
@@ -226,10 +242,9 @@ public class MainActivity extends AppCompatActivity
                 mBtnLoginFacebook.setVisibility(View.INVISIBLE);
                 layoutMap.setVisibility(View.VISIBLE);
 
-                Result();
                 SupportMapFragment mapFragment
                         = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap);
-
+                Result();
 
                 // Sét đặt sự kiện thời điểm GoogleMap đã sẵn sàng.
                 mapFragment.getMapAsync(new OnMapReadyCallback() {
@@ -429,6 +444,10 @@ public class MainActivity extends AppCompatActivity
         profilePictureView.buildDrawingCache();
         Bitmap bmap = profilePictureView.getDrawingCache();
         if (myLocation != null) {
+            Lati = myLocation.getLatitude();
+            Longi = myLocation.getLongitude();
+            AddLocation(urlInsertLocation);
+            //UpdateLocation(urlUpdateLocation);
 
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
@@ -457,16 +476,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Hàm thêm đối tượng user logi fb vào bảng User database
-    private  void AddUser(String url){
+    private void AddUser(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if(response.trim().equals("success")){
-                            //Toast.makeText(MainActivity.this,"",Toast.LENGTH_LONG).show();
-                        }else
-                        {
+                        if (response.trim().equals("success")) {
+                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
+                        } else {
                             //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
                         }
                     }
@@ -475,18 +493,87 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
-                        Log.d("AAA","Error:\n" +error.toString());
+                        Log.d("AAA", "Error:\n" + error.toString());
                     }
                 }
-        ){
+        ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("Id",idfb);
-                params.put("Name",namefb);
-                params.put("Email","null");
-                params.put("Phone","null");
-                params.put("Status","null");
+                Map<String, String> params = new HashMap<>();
+                params.put("Id", idfb);
+                params.put("Name", namefb);
+                params.put("Location", "null");
+                params.put("Phone", "null");
+                params.put("Status", "null");
+                params.put("Photo", "https://graph.facebook.com/" + idfb + "/picture?type=large");
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+
+    /// Thêm tọa độ người dùng lúc đăng nhập vào bảng Locaiton
+    private void AddLocation(String url) {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.trim().equals("success")) {
+                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
+                        } else {
+                            //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
+                        Log.d("AAA", "Error:\n" + error.toString());
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Userid", idfb);
+                params.put("Lati", Double.toString(Lati));
+                params.put("Longi",Double.toString(Longi));
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+
+    // Hàm cập nhật tọa độ
+    private void UpdateLocation(String url) {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.trim().equals("success")) {
+                            Toast.makeText(MainActivity.this, "Cập nhật tọa độ...", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Error!!!", Toast.LENGTH_LONG).show();
+                        Log.d("AAA", "Error:\n" + error.toString());
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Userid", idfb);
+                params.put("Lati", Double.toString(Lati));
+                params.put("Longi", Double.toString(Longi));
                 return params;
             }
         };

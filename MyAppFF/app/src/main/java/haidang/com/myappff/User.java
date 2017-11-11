@@ -10,13 +10,16 @@ public class User {
     String email;
     String phone;
     int stt;
+    String photo;
 
-    public User(String id, String name, String email, String phone, int stt) {
+    public User(String id, String name, String email, String phone, int stt, String photo) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.stt = stt;
+        this.photo = photo;
+
     }
 
 
@@ -59,5 +62,13 @@ public class User {
 
     public void setStt(int stt) {
         this.stt = stt;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }
