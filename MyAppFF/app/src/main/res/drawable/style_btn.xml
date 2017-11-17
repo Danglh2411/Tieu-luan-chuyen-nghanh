@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >
+// chinh vien cong
+    <corners
+        android:topLeftRadius="5dp"
+        android:bottomLeftRadius="5dp"
+        android:bottomRightRadius="5dp"
+        android:topRightRadius="5dp" />
+
+// mau vien
+    <stroke
+        android:width="1dp"
+        android:color="#1E90FF" />
+
+    <gradient
+        android:angle="90"
+        android:endColor="#1E90FF"
+        android:startColor="#1E90FF" />
+
+</shape>

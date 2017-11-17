@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="haidang.com.myappff.FindFriendActivity">
+    <ProgressBar
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:id="@+id/progressBarFF"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <LinearLayout
         android:background="@color/colorPrimary"
         android:orientation="horizontal"
@@ -14,48 +22,46 @@
         <ImageButton
             android:layout_gravity="center"
             android:id="@+id/btnBackFF"
-            android:background="@null"
+            android:background="@color/colorPrimary"
             android:layout_weight="2"
             android:src="@drawable/ic_back"
             android:layout_width="0dp"
             android:layout_height="match_parent" />
-        <TextView
-            android:textColor="#fff"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:text="Danh sách kết bạn"
-            android:layout_weight="8"
+        <FrameLayout
+            android:layout_weight="6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <EditText
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:textSize="16sp"
+                android:paddingLeft="5dp"
+                android:textColor="@color/white"
+                android:gravity="left|center"
+                android:hint="Nhập số điện thoại"
+                android:textColorHint="@color/white"
+                android:id="@+id/et_search"
+                android:background="@android:color/transparent" />
+            <ImageView
+                android:layout_marginTop="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/underlineeditext" />
+        </FrameLayout>
+        <ImageButton
+            android:background="@color/colorPrimary"
+            android:id="@+id/btnFindFriend"
+            android:layout_weight="2"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:src="@drawable/ic_search"
             android:layout_width="0dp"
             android:layout_height="match_parent" />
 
-    </LinearLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="60dp">
-        <EditText
-            android:layout_weight="7"
-            android:padding="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
-            android:background="@drawable/style_edt_search"
-            android:fontFamily="sans-serif"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:inputType="number"
-            android:hint="Tìm bạn bè"
-            android:textSize="20sp"
-            android:id="@+id/et_search" />
-        <Button
-            android:id="@+id/btnFindFriend"
-            android:layout_weight="3"
-            android:text="Tìm"
-            android:textAllCaps="false"
-            android:textSize="14sp"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_search"
-            android:layout_width="0dp"
-            android:layout_height="60dp" />
     </LinearLayout>
     <ListView
         android:layout_margin="10dp"
@@ -63,4 +69,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </ListView>
-</LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

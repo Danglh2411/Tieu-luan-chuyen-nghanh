@@ -7,14 +7,16 @@ package haidang.com.myappff;
 public class User {
     String id;
     String name;
+    String birth;
     String email;
     String phone;
     int stt;
     String photo;
 
-    public User(String id, String name, String email, String phone, int stt, String photo) {
+    public User(String id, String name,String birth, String email, String phone, int stt, String photo) {
         this.id = id;
         this.name = name;
+        this.birth = birth;
         this.email = email;
         this.phone = phone;
         this.stt = stt;
@@ -70,5 +72,13 @@ public class User {
 
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public String getBirth() {
+        return birth;
+    }
+
+    public void setBirth(String birth) {
+        this.birth = birth;
     }
 }

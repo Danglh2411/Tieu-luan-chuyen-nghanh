@@ -1,10 +1,13 @@
 package haidang.com.myappff;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -45,6 +48,8 @@ public class AdapterListFriend extends BaseAdapter {
     private class ViewHolder{
         TextView txtName;
         CircleImageView imgPic;
+        LinearLayout item;
+        ListView lvuser;
 
     }
 
@@ -59,6 +64,7 @@ public class AdapterListFriend extends BaseAdapter {
             view = inflater.inflate(layout,null);
             holder.txtName = (TextView) view.findViewById(R.id.txtNameLFM);
             holder.imgPic = (CircleImageView) view.findViewById(R.id.imgPicLFM);
+            holder.item = (LinearLayout)view.findViewById(R.id.layoutFriend);
             view.setTag(holder);
         }else  {
             holder = (AdapterListFriend.ViewHolder) view.getTag();
@@ -70,6 +76,18 @@ public class AdapterListFriend extends BaseAdapter {
                 .load(urlpic)
                 .placeholder(R.drawable.loading)
                 .into(holder.imgPic);
+
+        holder.item.setOnClickListener(new    View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent mhm = new Intent(context, InfFriendActivity.class);
+                mhm.putExtra("Userid1",user.getUserid1());
+                mhm.putExtra("Userid2",user.getUserid2());
+                context.startActivity(mhm);
+            }
+        });
+
+
         return view;
     }
 }

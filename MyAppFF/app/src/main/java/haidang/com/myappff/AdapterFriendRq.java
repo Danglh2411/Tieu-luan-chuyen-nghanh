@@ -32,6 +32,7 @@ public class AdapterFriendRq extends BaseAdapter {
     private Context context;
     private  int layout;
     String urlAddFriend = "https://apptimnhau.000webhostapp.com/addfriend.php";
+    String urldeleteFriendRq = "https://apptimnhau.000webhostapp.com/deleteFriendRq.php";
     String userid1;
     String userid2;
     String nameu1;
@@ -102,8 +103,9 @@ public class AdapterFriendRq extends BaseAdapter {
                     nameu2 = user.getNameu2();
                     AddFriend1(urlAddFriend);
                     AddFriend2(urlAddFriend);
-                holder.addFriend.setText("Bạn bè");
-                holder.addFriend.setEnabled(false);
+                    DeleteFriendRq(urldeleteFriendRq);
+                    holder.addFriend.setText("Bạn bè");
+                    holder.addFriend.setEnabled(false);
             }
         });
         return view;
@@ -178,6 +180,40 @@ public class AdapterFriendRq extends BaseAdapter {
                 params.put("NaUser1",nameu2);
                 params.put("Userid2",userid1);
                 params.put("NaUser2",nameu1);
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+    /////
+    private  void DeleteFriendRq(String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.trim().equals("succ " +
+                                "ess")){
+                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
+                        }else
+                        {
+                            //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
+                        Log.d("AAA","Error:\n" +error.toString());
+                    }
+                }
+        ){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("Userid1",userid1);
+                params.put("Userid2",userid2);
                 return params;
             }
         };

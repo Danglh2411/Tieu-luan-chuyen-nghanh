@@ -88,8 +88,9 @@ public class AdapterFindFriend extends BaseAdapter {
             holder = (AdapterFindFriend.ViewHolder) view.getTag();
         }
         final User user = userlist.get(i);
+
         holder.txtName.setText(user.getName());
-        String urlpic =user.getPhoto();
+        String urlpic ="https://graph.facebook.com/"+user.getId()+"/picture?type=large";
         Picasso.with(context)
                 .load(urlpic)
                 .placeholder(R.drawable.loading)

@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -36,7 +36,9 @@ public class FindFriendActivity extends AppCompatActivity {
     String nauser;
     ImageButton btnBack;
     EditText edtPhone;
-    Button btnSearch;
+    ImageButton btnSearch;
+    ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +48,8 @@ public class FindFriendActivity extends AppCompatActivity {
             userid = bdLF.getString("Userid");
             nauser = bdLF.getString("NaUser");
         }
+
+
         lvuser = (ListView)findViewById(R.id.listFindFriend);
         arrayUser = new ArrayList<>();
         adapter = new AdapterFindFriend(FindFriendActivity.this, R.layout.itemlistfriend,arrayUser,userid,nauser);
@@ -63,12 +67,16 @@ public class FindFriendActivity extends AppCompatActivity {
             }
         });
         edtPhone = (EditText) findViewById(R.id.et_search);
-        btnSearch =(Button)findViewById(R.id.btnFindFriend);
+        btnSearch =(ImageButton) findViewById(R.id.btnFindFriend);
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                //getting the progressbar
+                progressBar = (ProgressBar) findViewById(R.id.progressBarFF);
+                //making the progressbar visible
+                progressBar.setVisibility(View.VISIBLE);
                 FindFriend(myurl);
             }
         });
@@ -80,6 +88,7 @@ public class FindFriendActivity extends AppCompatActivity {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String  response) {
+                progressBar.setVisibility(View.INVISIBLE);
                 for (int i = 0; i < response.length(); i++){
                     try {
                         JSONObject jsonobject = new JSONObject(response);
@@ -88,6 +97,7 @@ public class FindFriendActivity extends AppCompatActivity {
                         arrayUser.add(new User(
                                 object.getString("Id"),
                                 object.getString("Name"),
+                                object.getString("BirthDay"),
                                 object.getString("Email"),
                                 object.getString("Phone"),
                                 object.getInt("Status"),

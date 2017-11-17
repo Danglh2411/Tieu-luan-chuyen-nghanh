@@ -4,11 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,55 +31,37 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.Profile;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
-import com.facebook.login.widget.ProfilePictureView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
-    private LoginButton mBtnLoginFacebook;
-    private CallbackManager mCallbackManager;
-    private ProfilePictureView profilePictureView;
-    CircleImageView avtFB;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
 
-    String idfb;
-    String namefb;
-    Double Lati;
-    Double Longi;
 
-    String urlAddUser = "https://apptimnhau.000webhostapp.com/insert.php";
+    public static String idfb;
+    public static String namefb;
+    public static String urlphoto;
+    public Double Lati;
+    public Double Longi;
+    public Bitmap theBitmap;
+
     String urlUpdateLocation = "https://apptimnhau.000webhostapp.com/updateLocation.php";
     String urlInsertLocation = "https://apptimnhau.000webhostapp.com/insertLocation.php";
-    private TextView mTvInfo;
-    View layoutMap;
+
+    TextView txtUserName;
+    CircleImageView imgUser;
     private GoogleMap myMap;
     private NavigationView navigationView;
     private static final String MYTAG = "MYTAG";
@@ -95,16 +72,31 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
+        Bundle bdLF = getIntent().getExtras();
+        if(bdLF!=null){
+            idfb = bdLF.getString("Userid");
+            namefb = bdLF.getString("Name");
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mCallbackManager = CallbackManager.Factory.create();
         AnhXa();
-        mBtnLoginFacebook.setReadPermissions(Arrays.asList("public_profile"));
-        // Gọi sự kiện đăng nhập
-        SetLoginButton();
+        txtUserName.setText(namefb);
+        urlphoto ="https://graph.facebook.com/"+idfb+"/picture?type=large";
+        Picasso.with(this)
+                .load(urlphoto)
+                .placeholder(R.drawable.loading)
+                .into(imgUser);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap);
 
+        // Sét đặt sự kiện thời điểm GoogleMap đã sẵn sàng.
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                onMyMapReady(googleMap);
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -125,11 +117,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -138,135 +125,36 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_infor) {
-            // Handle the camera action
+            startActivity(new Intent(this,InfUserActivity.class));
         } else if (id == R.id.nav_friend) {
             Intent mh = new Intent(MainActivity.this, ListFriendActivity.class);
-            mh.putExtra("Userid",idfb);
+            mh.putExtra("Userid", idfb);
             startActivity(mh);
-        } else if (id == R.id.nav_findfriend) {
-            Intent mhmain = new Intent(MainActivity.this, FindFriendActivity.class);
-            mhmain.putExtra("Userid",idfb);
-            mhmain.putExtra("NaUser",namefb);
-            startActivity(mhmain);
-        } else if (id == R.id.nav_friendrq) {
+        }  else if (id == R.id.nav_friendrq) {
             Intent mhm = new Intent(MainActivity.this, ListFriendRqActivity.class);
-            mhm.putExtra("Userid",idfb);
+            mhm.putExtra("Userid", idfb);
             startActivity(mhm);
 
+        }else if (id == R.id.nav_find_friend) {
+            Intent mhm1 = new Intent(MainActivity.this, FindFriendActivity.class);
+            mhm1.putExtra("Userid", idfb);
+            mhm1.putExtra("NaUser", namefb);
+            startActivity(mhm1);
+
         }
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    public Bitmap getCircleImage(final Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(),
-                bitmap.getHeight());
 
-        final int radius;
-        if (bitmap.getHeight() > bitmap.getWidth()) {
-            radius = bitmap.getWidth() / 2;
-        } else {
-            radius = bitmap.getHeight() / 2;
-        }
 
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        // paint.setColor(color);
-        canvas.drawCircle(bitmap.getWidth() / 2,
-                bitmap.getHeight() / 2, radius, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
-    }
-
-    private void Result() {
-        GraphRequest graphRequest = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-            @Override
-            public void onCompleted(JSONObject object, GraphResponse response) {
-                Log.d("JSON", response.getJSONObject().toString());
-                try {
-
-                    namefb = object.getString("name");
-                    idfb = object.getString("id");
-                    profilePictureView.setProfileId(Profile.getCurrentProfile().getId());
-                    //  iconmaker.setImageURI();
-                    mTvInfo.setText(namefb);
-                    //     mEmail.setText(email);
-                    //JSONObject JOSource = object.optJSONObject("cover");
-                    //coverPhoto = JOSource.getString("source");
-                    AddUser(urlAddUser);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large),cover");
-        graphRequest.setParameters(parameters);
-        graphRequest.executeAsync();
-    }
-
-    @Override
-    protected void onStart() {
-        LoginManager.getInstance().logOut();
-        super.onStart();
-    }
 
     public void AnhXa() {
-        //circleImageView= (CircleImageView) findViewById(R.id.imageProfilePicture);
-
-        mBtnLoginFacebook = (LoginButton) findViewById(R.id.btn_login_facebook);
-
-        //   mEmail = (TextView) findViewById(R.id.tv_email);
-        layoutMap = findViewById(R.id.layoutMap);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
-        mTvInfo = (TextView) header.findViewById(R.id.tv_name);
-
-        //avtFB = (CircleImageView) findViewById(R.id.avatarfb);
-        profilePictureView = (ProfilePictureView) header.findViewById(R.id.imageProfilePicture);
-    }
-
-    private void SetLoginButton() {
-        mBtnLoginFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                mBtnLoginFacebook.setVisibility(View.INVISIBLE);
-                layoutMap.setVisibility(View.VISIBLE);
-
-                SupportMapFragment mapFragment
-                        = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap);
-                Result();
-
-                // Sét đặt sự kiện thời điểm GoogleMap đã sẵn sàng.
-                mapFragment.getMapAsync(new OnMapReadyCallback() {
-
-                    @Override
-                    public void onMapReady(GoogleMap googleMap) {
-                        onMyMapReady(googleMap);
-                    }
-                });
-
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
-            }
-        });
+        txtUserName = (TextView) header.findViewById(R.id.tv_name);
+        imgUser = (CircleImageView) header.findViewById(R.id.imgUser);
     }
 
     @Override
@@ -286,6 +174,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onProviderDisabled(String provider) {
+
 
     }
 
@@ -354,8 +243,7 @@ public class MainActivity extends AppCompatActivity
 
     // Khi người dùng trả lời yêu cầu cấp quyền (cho phép hoặc từ chối).
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         //
@@ -441,13 +329,11 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        profilePictureView.buildDrawingCache();
-        Bitmap bmap = profilePictureView.getDrawingCache();
         if (myLocation != null) {
             Lati = myLocation.getLatitude();
             Longi = myLocation.getLongitude();
             AddLocation(urlInsertLocation);
-            //UpdateLocation(urlUpdateLocation);
+            UpdateLocation(urlUpdateLocation);
 
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
@@ -460,56 +346,19 @@ public class MainActivity extends AppCompatActivity
                     .build();                   // Creates a CameraPosition from the builder
             myMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-            // Thêm Marker cho Map:
-            MarkerOptions option = new MarkerOptions();
-            option.title(namefb);
-            //option.snippet(email);
-            option.icon(BitmapDescriptorFactory.fromBitmap(bmap));
-            option.position(latLng);
-            Marker currentMarker = myMap.addMarker(option);
+
+
+            MarkerOptions marker = new MarkerOptions();
+            marker.title(namefb);
+           // marker.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+            marker.position(latLng);
+            Marker currentMarker = myMap.addMarker(marker);
             currentMarker.showInfoWindow();
         } else {
             Toast.makeText(this, "Location not found!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "Location not found");
         }
 
-    }
-
-    // Hàm thêm đối tượng user logi fb vào bảng User database
-    private void AddUser(String url) {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if (response.trim().equals("success")) {
-                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
-                        } else {
-                            //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
-                        Log.d("AAA", "Error:\n" + error.toString());
-                    }
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("Id", idfb);
-                params.put("Name", namefb);
-                params.put("Location", "null");
-                params.put("Phone", "null");
-                params.put("Status", "null");
-                params.put("Photo", "https://graph.facebook.com/" + idfb + "/picture?type=large");
-                return params;
-            }
-        };
-        requestQueue.add(stringRequest);
     }
 
     /// Thêm tọa độ người dùng lúc đăng nhập vào bảng Locaiton
@@ -539,7 +388,7 @@ public class MainActivity extends AppCompatActivity
                 Map<String, String> params = new HashMap<>();
                 params.put("Userid", idfb);
                 params.put("Lati", Double.toString(Lati));
-                params.put("Longi",Double.toString(Longi));
+                params.put("Longi", Double.toString(Longi));
                 return params;
             }
         };

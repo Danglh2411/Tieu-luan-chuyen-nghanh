@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -32,6 +33,7 @@ public class ListFriendRqActivity extends AppCompatActivity {
     AdapterFriendRq adapter;
     ImageButton btnBack;
     String id;
+    ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +41,14 @@ public class ListFriendRqActivity extends AppCompatActivity {
         Bundle bdLF = getIntent().getExtras();
         if(bdLF!=null){
             id = bdLF.getString("Userid");
-            Toast.makeText(ListFriendRqActivity.this,id,Toast.LENGTH_LONG).show();
         }
         lvuser = (ListView)findViewById(R.id.listFriendRq);
+        //getting the progressbar
+        progressBar = (ProgressBar) findViewById(R.id.progressBarLFRQ);
+
+        //making the progressbar visible
+        progressBar.setVisibility(View.VISIBLE);
+
         arrayUser = new ArrayList<>();
         adapter = new AdapterFriendRq(ListFriendRqActivity.this, R.layout.itemfriendrq,arrayUser);
         lvuser.setAdapter(adapter);
@@ -64,6 +71,7 @@ public class ListFriendRqActivity extends AppCompatActivity {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String  response) {
+                progressBar.setVisibility(View.INVISIBLE);
                 for (int i = 0; i < response.length(); i++){
                     try {
                         JSONObject jsonobject = new JSONObject(response);
