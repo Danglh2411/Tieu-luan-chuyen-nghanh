@@ -82,7 +82,9 @@ public class AdapterListFriend extends BaseAdapter {
             public void onClick(View view){
                 Intent mhm = new Intent(context, InfFriendActivity.class);
                 mhm.putExtra("Userid1",user.getUserid1());
+                mhm.putExtra("NaUser1",user.getNameu1());
                 mhm.putExtra("Userid2",user.getUserid2());
+                mhm.putExtra("NaUser2",user.getNameu2());
                 context.startActivity(mhm);
             }
         });

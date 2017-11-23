@@ -17,7 +17,7 @@
         <item
             android:id="@+id/nav_locationrq"
             android:icon="@drawable/ic_location_on_black_24dp"
-            android:title="Chia sẽ vị trí" />
+            android:title="Chia sẻ vị trí" />
 
         <item
             android:id="@+id/nav_find_friend"

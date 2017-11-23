@@ -141,6 +141,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mhm1.putExtra("NaUser", namefb);
             startActivity(mhm1);
 
+        }else if (id == R.id.nav_locationrq) {
+            Intent mhm2 = new Intent(MainActivity.this, ListLocationRqActivity.class);
+            mhm2.putExtra("Userid", idfb);
+            startActivity(mhm2);
+
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

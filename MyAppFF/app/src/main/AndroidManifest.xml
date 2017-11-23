@@ -42,7 +42,8 @@
         <activity android:name=".ListFriendRqActivity" />
         <activity android:name=".ListFriendActivity" />
         <activity android:name=".InfUserActivity" />
-        <activity android:name=".InfFriendActivity"></activity>
+        <activity android:name=".InfFriendActivity" />
+        <activity android:name=".ListLocationRqActivity"></activity>
     </application>
 
 </manifest>

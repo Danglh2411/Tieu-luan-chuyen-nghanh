@@ -16,30 +16,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout
-        android:background="@color/colorPrimary"
-        android:id="@+id/layoutSearch"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="60dp">
-        <ImageButton
-            android:layout_gravity="center"
-            android:id="@+id/btnBackFR"
-            android:background="@null"
-            android:layout_weight="2"
-            android:src="@drawable/ic_back"
-            android:layout_width="0dp"
-            android:layout_height="match_parent" />
-        <TextView
-            android:textColor="#fff"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:text="Danh sách kết bạn"
-            android:layout_weight="8"
-            android:layout_width="0dp"
-            android:layout_height="match_parent" />
+        <RelativeLayout
+            android:background="@color/colorPrimary"
+            android:id="@+id/layoutSearch"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageButton
+                android:layout_gravity="center"
+                android:id="@+id/btnBackFR"
+                android:background="@null"
+                android:src="@drawable/ic_back"
+                android:layout_width="60dp"
+                android:layout_height="match_parent" />
+            <TextView
+                android:layout_centerInParent="true"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:gravity="center"
+                android:text="Yêu cầu kết bạn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-    </LinearLayout>
+        </RelativeLayout>
     <ListView
         android:layout_margin="10dp"
         android:layout_weight="8"
