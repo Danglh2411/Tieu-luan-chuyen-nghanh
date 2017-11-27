@@ -1,6 +1,7 @@
 package haidang.com.myappff;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,22 +33,21 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class AdapterLocationShare extends BaseAdapter {
     private Context context;
     private int layout;
-    String urldeleteShareLocation = "https://apptimnhau.000webhostapp.com/deletelocationshare.php";
+    String urldeleteShareLocation = "https://apptimnhau.000webhostapp.com/UpdateSttLocation.php";
     String userid1;
     String userid2;
     String nameu1;
-    String nameu2;
     String stt = "0";
 
 
-    public AdapterLocationShare(Context context, int layout, List<LocationRq> userlist) {
+    public AdapterLocationShare(Context context, int layout, List<Friend> userlist) {
         this.context = context;
         this.layout = layout;
         this.userlist = userlist;
 
     }
 
-    private List<LocationRq> userlist;
+    private List<Friend> userlist;
 
     @Override
     public int getCount() {
@@ -87,7 +87,7 @@ public class AdapterLocationShare extends BaseAdapter {
         } else {
             holder = (AdapterLocationShare.ViewHolder) view.getTag();
         }
-        final LocationRq user = userlist.get(i);
+        final Friend user = userlist.get(i);
 
         holder.txtName.setText(user.getNameu1());
         String urlpic = "https://graph.facebook.com/" + user.getUserid1() + "/picture?type=large";
@@ -102,17 +102,16 @@ public class AdapterLocationShare extends BaseAdapter {
             public void onClick(View view) {
                 userid1 = user.getUserid1();
                 userid2 = user.getUserid2();
-                nameu1 = user.getNameu1();
-                nameu2 = user.getNameu2();
-                DeleteLocationShare(urldeleteShareLocation);
+                UpdateSttLocation(urldeleteShareLocation);
+                Intent adt = new Intent(context, ListLocationRqActivity.class);
+                adt.putExtra("Userid",user.getUserid1());
+                context.startActivity(adt);
             }
         });
         return view;
     }
 
-
-
-    //// Hàm cập nhật trạng thái chia sser vị trí
+    /// Hàm thu hồi share
     private void UpdateSttLocation(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -139,41 +138,7 @@ public class AdapterLocationShare extends BaseAdapter {
                 Map<String, String> params = new HashMap<>();
                 params.put("Userid1",userid1);
                 params.put("Userid2",userid2);
-                params.put("Status",stt);
-                return params;
-            }
-        };
-        requestQueue.add(stringRequest);
-    }
-    /// Hàm thu hồi share
-    private  void DeleteLocationShare(String url){
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if(response.trim().equals("succ " +
-                                "ess")){
-                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
-                        }else
-                        {
-                            //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
-                        Log.d("AAA","Error:\n" +error.toString());
-                    }
-                }
-        ){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("Userid1",userid1);
-                params.put("Userid2",userid2);
+                params.put("Status","0");
                 return params;
             }
         };

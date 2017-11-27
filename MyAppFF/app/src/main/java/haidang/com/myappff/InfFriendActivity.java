@@ -35,7 +35,7 @@ public class InfFriendActivity extends AppCompatActivity {
 
     String JsonURL = "https://apptimnhau.000webhostapp.com/getfriend.php";
     String urldeleteFriend = "https://apptimnhau.000webhostapp.com/deleteFriend.php";
-    String urladdLocationRq = "https://apptimnhau.000webhostapp.com/insertLocationRq.php";
+    String urladdLocationRq = "https://apptimnhau.000webhostapp.com/UpdateSttLocation.php";
     public static String IdFriend;
     public static String IdUser;
     public static String NameFriend;
@@ -62,10 +62,9 @@ public class InfFriendActivity extends AppCompatActivity {
         setContentView(R.layout.activity_inf_friend);
         Bundle bdLF = getIntent().getExtras();
         if(bdLF!=null){
-            IdUser = bdLF.getString("Userid1");
-            NameUser = bdLF.getString("NaUser1");
-            IdFriend = bdLF.getString("Userid2");
-            NameFriend = bdLF.getString("NaUser2");
+            IdFriend = bdLF.getString("Userid1");
+            NameFriend = bdLF.getString("NaUser1");
+            IdUser = bdLF.getString("Userid2");
 
         }
         Anhxa();
@@ -148,7 +147,7 @@ public class InfFriendActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                AddLocationRq(urladdLocationRq);
+                UpdateSttLocationRq(urladdLocationRq);
                 YCViTri.setText("Chờ xác nhận");
                 YCViTri.setBackgroundResource(R.drawable.style_btn_clicked);
                 YCViTri.setEnabled(false);
@@ -273,41 +272,37 @@ private  void DeleteFriend2 (String url){
 }
 
 /// Gửi yêu cầu chia sẽ vị trí
-private  void AddLocationRq(String url){
-    RequestQueue requestQueue = Volley.newRequestQueue(this);
-    StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    if(response.trim().equals("succ " +
-                            "ess")){
-                        //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
-                    }else
-                    {
-                        //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
+    private void UpdateSttLocationRq(String url) {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (response.trim().equals("success")) {
+
+                        } else {
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Toast.makeText(this, "Error!!!", Toast.LENGTH_LONG).show();
+                        Log.d("AAA", "Error:\n" + error.toString());
                     }
                 }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
-                    Log.d("AAA","Error:\n" +error.toString());
-                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Userid1",IdUser);
+                params.put("Userid2",IdFriend);
+                params.put("Status","1");
+                return params;
             }
-    ){
-        @Override
-        protected Map<String, String> getParams() throws AuthFailureError {
-            Map<String,String> params = new HashMap<>();
-            params.put("Userid1",IdUser);
-            params.put("NaUser1",NameUser);
-            params.put("Userid2",IdFriend);
-            params.put("NaUser2",NameFriend);
-            params.put("Status","0");
-            return params;
-        }
-    };
-    requestQueue.add(stringRequest);
-}
+        };
+        requestQueue.add(stringRequest);
+    }
 
 }

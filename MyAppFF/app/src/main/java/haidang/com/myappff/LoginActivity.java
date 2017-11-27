@@ -52,7 +52,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
-    /////
     private void Result() {
         GraphRequest graphRequest = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
             @Override

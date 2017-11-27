@@ -70,8 +70,8 @@ public class AdapterListFriend extends BaseAdapter {
             holder = (AdapterListFriend.ViewHolder) view.getTag();
         }
         final Friend user = userlist.get(i);
-        holder.txtName.setText(user.getNameu2());
-        String urlpic ="https://graph.facebook.com/"+user.getUserid2()+"/picture?type=large";
+        holder.txtName.setText(user.getNameu1());
+        String urlpic ="https://graph.facebook.com/"+user.getUserid1()+"/picture?type=large";
         Picasso.with(context)
                 .load(urlpic)
                 .placeholder(R.drawable.loading)
@@ -84,7 +84,6 @@ public class AdapterListFriend extends BaseAdapter {
                 mhm.putExtra("Userid1",user.getUserid1());
                 mhm.putExtra("NaUser1",user.getNameu1());
                 mhm.putExtra("Userid2",user.getUserid2());
-                mhm.putExtra("NaUser2",user.getNameu2());
                 context.startActivity(mhm);
             }
         });

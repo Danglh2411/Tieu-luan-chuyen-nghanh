@@ -15,12 +15,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +40,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,15 +54,23 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
 
 
-    public static String idfb;
+    public  static String idfb;
     public static String namefb;
-    public static String urlphoto;
-    public Double Lati;
-    public Double Longi;
+    public  String urlphoto;
+    public double Lati;
+    public double Longi;
+    public String LatiF;
+    public String LongiF;
     public Bitmap theBitmap;
 
     String urlUpdateLocation = "https://apptimnhau.000webhostapp.com/updateLocation.php";
     String urlInsertLocation = "https://apptimnhau.000webhostapp.com/insertLocation.php";
+
+    // Of spinner
+    String myurl ="https://apptimnhau.000webhostapp.com/getspinner.php";
+    Spinner spinnerLocation;
+    ArrayList<ShareLoaction> arrayUser;
+    AdapterSpinner adapter;
 
     TextView txtUserName;
     CircleImageView imgUser;
@@ -73,14 +85,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Bundle bdLF = getIntent().getExtras();
-        if(bdLF!=null){
-            idfb = bdLF.getString("Userid");
-            namefb = bdLF.getString("Name");
+
+
+        Bundle bd2 = getIntent().getExtras();
+        if(bd2!=null){
+            LatiF = bd2.getString("Lati");
+            LongiF = bd2.getString("Longi");
+            idfb = bd2.getString("Userid");
+            namefb = bd2.getString("Name");
+            Toast.makeText(MainActivity.this,LatiF+ " : "+ LongiF, Toast.LENGTH_LONG).show();
         }
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+        Bundle bd1 = getIntent().getExtras();
+        if(bd1!=null){
+            idfb = bd1.getString("Userid");
+            namefb = bd1.getString("Name");
+        }
+
+
+
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
         AnhXa();
+
         txtUserName.setText(namefb);
         urlphoto ="https://graph.facebook.com/"+idfb+"/picture?type=large";
         Picasso.with(this)
@@ -99,12 +126,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        //ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                //this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+       // drawer.setDrawerListener(toggle);
+       // toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Spinner
+
+        arrayUser = new ArrayList<>();
+        adapter = new AdapterSpinner(MainActivity.this, R.layout.itemspinner,arrayUser,namefb);
+        GetListLocationShare(myurl);
+        spinnerLocation.setAdapter(adapter);
     }
 
     @Override
@@ -160,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View header = navigationView.getHeaderView(0);
         txtUserName = (TextView) header.findViewById(R.id.tv_name);
         imgUser = (CircleImageView) header.findViewById(R.id.imgUser);
+        spinnerLocation =(Spinner) findViewById(R.id.SpinnerShareLocation);
     }
 
     @Override
@@ -408,16 +443,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onResponse(String response) {
                         if (response.trim().equals("success")) {
-                            Toast.makeText(MainActivity.this, "Cập nhật tọa độ...", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Cập nhật tọa độ...", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_LONG).show();
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "Error!!!", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainActivity.this, "Error!!!", Toast.LENGTH_LONG).show();
                         Log.d("AAA", "Error:\n" + error.toString());
                     }
                 }
@@ -428,6 +463,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 params.put("Userid", idfb);
                 params.put("Lati", Double.toString(Lati));
                 params.put("Longi", Double.toString(Longi));
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+
+
+    // ham get item of spinner
+    private void GetListLocationShare(String url  ){
+        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String  response) {
+                for (int i = 0; i < response.length(); i++){
+                    try {
+                        JSONObject jsonobject = new JSONObject(response);
+                        JSONArray jsonarray = jsonobject.getJSONArray("friend");
+                        JSONObject object = jsonarray.getJSONObject(i);
+                        arrayUser.add(new ShareLoaction(
+                                object.getString("Id"),
+                                object.getString("Name"),
+                                object.getString("Userid1"),
+                                object.getString("Lati"),
+                                object.getString("Longi")
+
+                        ));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                error.printStackTrace();
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("id",idfb);
+                params.put("Status","2");
                 return params;
             }
         };

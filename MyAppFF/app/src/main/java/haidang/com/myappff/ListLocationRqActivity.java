@@ -28,12 +28,14 @@ import java.util.Map;
 public class ListLocationRqActivity extends AppCompatActivity {
 
     String myurl ="https://apptimnhau.000webhostapp.com/getlocationrq.php";
-    ListView lvlocationrq;
     ListView lvlocationshare;
-    ArrayList<LocationRq> arrayUser;
-    ArrayList<LocationRq> arrayUser1;
-    AdapterLocationRq adapter;
+    ArrayList<Friend> arrayUser1;
     AdapterLocationShare adapter1;
+
+    ListView lvlocationrq;
+    ArrayList<Friend> arrayUser;
+    AdapterLocationRq adapter;
+
     ImageButton btnBack;
     public static String id;
     ProgressBar progressBar;
@@ -86,13 +88,10 @@ public class ListLocationRqActivity extends AppCompatActivity {
                         JSONObject jsonobject = new JSONObject(response);
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
                         JSONObject object = jsonarray.getJSONObject(i);
-                        arrayUser.add(new LocationRq(
-                                object.getInt("Id"),
-                                object.getString("Userid1"),
-                                object.getString("NaUser1"),
-                                object.getString("Userid2"),
-                                object.getString("NaUser2"),
-                                object.getInt("Status")
+                        arrayUser.add(new Friend(
+                                object.getString("Id"),
+                                object.getString("Name"),
+                                object.getString("Userid2")
 
                         ));
                     } catch (JSONException e) {
@@ -113,7 +112,7 @@ public class ListLocationRqActivity extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params = new HashMap<>();
                 params.put("id",id);
-                params.put("Status","0");
+                params.put("Status","1");
                 return params;
             }
         };
@@ -132,14 +131,10 @@ public class ListLocationRqActivity extends AppCompatActivity {
                         JSONObject jsonobject = new JSONObject(response);
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
                         JSONObject object = jsonarray.getJSONObject(i);
-                        arrayUser1.add(new LocationRq(
-                                object.getInt("Id"),
-                                object.getString("Userid1"),
-                                object.getString("NaUser1"),
-                                object.getString("Userid2"),
-                                object.getString("NaUser2"),
-                                object.getInt("Status")
-
+                        arrayUser1.add(new Friend(
+                                object.getString("Id"),
+                                object.getString("Name"),
+                                object.getString("Userid2")
                         ));
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -159,7 +154,7 @@ public class ListLocationRqActivity extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params = new HashMap<>();
                 params.put("id",id);
-                params.put("Status","1");
+                params.put("Status","2");
                 return params;
             }
         };

@@ -82,11 +82,9 @@ public class ListFriendActivity extends AppCompatActivity {
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
                         JSONObject object = jsonarray.getJSONObject(i);
                         arrayUser.add(new Friend(
-                                object.getInt("Id"),
-                                object.getString("Userid1"),
-                                object.getString("NaUser1"),
-                                object.getString("Userid2"),
-                                object.getString("NaUser2")
+                                object.getString("Id"),
+                                object.getString("Name"),
+                                object.getString("Userid2")
 
                         ));
                     } catch (JSONException e) {

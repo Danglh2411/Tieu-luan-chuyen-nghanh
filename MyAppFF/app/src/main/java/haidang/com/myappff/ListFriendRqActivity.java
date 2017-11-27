@@ -29,7 +29,7 @@ public class ListFriendRqActivity extends AppCompatActivity {
 
     String myurl ="https://apptimnhau.000webhostapp.com/getfriendrq.php";
     ListView lvuser;
-    ArrayList<FiendRq> arrayUser;
+    ArrayList<Friend> arrayUser;
     AdapterFriendRq adapter;
     ImageButton btnBack;
     String id;
@@ -77,12 +77,10 @@ public class ListFriendRqActivity extends AppCompatActivity {
                         JSONObject jsonobject = new JSONObject(response);
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
                         JSONObject object = jsonarray.getJSONObject(i);
-                        arrayUser.add(new FiendRq(
-                                object.getInt("Id"),
-                                object.getString("Userid1"),
-                                object.getString("NaUser1"),
-                                object.getString("Userid2"),
-                                object.getString("NaUser2")
+                        arrayUser.add(new Friend(
+                                object.getString("Id"),
+                                object.getString("Name"),
+                                object.getString("Userid2")
 
                         ));
                     } catch (JSONException e) {

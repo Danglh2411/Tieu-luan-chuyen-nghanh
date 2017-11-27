@@ -33,23 +33,19 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class AdapterLocationRq extends BaseAdapter {
     private Context context;
     private int layout;
-    String urlShareLocation = "https://apptimnhau.000webhostapp.com/updatesttlocation.php";
-    AdapterLocationRq adapter;
+    String urlShareLocation = "https://apptimnhau.000webhostapp.com/UpdateSttLocation.php";
     String userid1;
     String userid2;
-    String nameu1;
-    String nameu2;
-    String stt = "1";
 
 
-    public AdapterLocationRq(Context context, int layout, List<LocationRq> userlist) {
+    public AdapterLocationRq(Context context, int layout, List<Friend> userlist) {
         this.context = context;
         this.layout = layout;
         this.userlist = userlist;
 
     }
 
-    private List<LocationRq> userlist;
+    private List<Friend> userlist;
 
     @Override
     public int getCount() {
@@ -89,7 +85,7 @@ public class AdapterLocationRq extends BaseAdapter {
         } else {
             holder = (AdapterLocationRq.ViewHolder) view.getTag();
         }
-        final LocationRq user = userlist.get(i);
+        final Friend user = userlist.get(i);
 
         holder.txtName.setText(user.getNameu1());
         String urlpic = "https://graph.facebook.com/" + user.getUserid1() + "/picture?type=large";
@@ -104,8 +100,6 @@ public class AdapterLocationRq extends BaseAdapter {
             public void onClick(View view) {
                 userid1 = user.getUserid1();
                 userid2 = user.getUserid2();
-                nameu1 = user.getNameu1();
-                nameu2 = user.getNameu2();
                 UpdateSttLocation(urlShareLocation);
                 holder.btnShare.setText("Đã gửi");
                 holder.btnShare.setEnabled(false);
@@ -146,7 +140,7 @@ public class AdapterLocationRq extends BaseAdapter {
                 Map<String, String> params = new HashMap<>();
                 params.put("Userid1",userid1);
                 params.put("Userid2",userid2);
-                params.put("Status",stt);
+                params.put("Status","2");
                 return params;
             }
         };

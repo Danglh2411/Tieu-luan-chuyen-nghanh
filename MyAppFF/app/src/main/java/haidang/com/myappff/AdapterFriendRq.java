@@ -35,18 +35,16 @@ public class AdapterFriendRq extends BaseAdapter {
     String urldeleteFriendRq = "https://apptimnhau.000webhostapp.com/deleteFriendRq.php";
     String userid1;
     String userid2;
-    String nameu1;
-    String nameu2;
 
 
-    public AdapterFriendRq(Context context, int layout, List<FiendRq> userlist) {
+    public AdapterFriendRq(Context context, int layout, List<Friend> userlist) {
         this.context = context;
         this.layout = layout;
         this.userlist = userlist;
 
     }
 
-    private List<FiendRq> userlist;
+    private List<Friend> userlist;
     @Override
     public int getCount() {
         return userlist.size();
@@ -84,7 +82,7 @@ public class AdapterFriendRq extends BaseAdapter {
         }else  {
             holder = (AdapterFriendRq.ViewHolder) view.getTag();
         }
-        final FiendRq user = userlist.get(i);
+        final Friend user = userlist.get(i);
 
         holder.txtName.setText(user.getNameu1());
         String urlpic ="https://graph.facebook.com/"+user.getUserid1()+"/picture?type=large";
@@ -99,8 +97,6 @@ public class AdapterFriendRq extends BaseAdapter {
             public void onClick(View view){
                     userid1 = user.getUserid1();
                     userid2 = user.getUserid2();
-                    nameu1 = user.getNameu1();
-                    nameu2 = user.getNameu2();
                     AddFriend1(urlAddFriend);
                     AddFriend2(urlAddFriend);
                     DeleteFriendRq(urldeleteFriendRq);
@@ -140,9 +136,7 @@ public class AdapterFriendRq extends BaseAdapter {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params = new HashMap<>();
                 params.put("Userid1",userid1);
-                params.put("NaUser1",nameu1);
                 params.put("Userid2",userid2);
-                params.put("NaUser2",nameu2);
                 return params;
             }
         };
@@ -177,9 +171,7 @@ public class AdapterFriendRq extends BaseAdapter {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params = new HashMap<>();
                 params.put("Userid1",userid2);
-                params.put("NaUser1",nameu2);
                 params.put("Userid2",userid1);
-                params.put("NaUser2",nameu1);
                 return params;
             }
         };

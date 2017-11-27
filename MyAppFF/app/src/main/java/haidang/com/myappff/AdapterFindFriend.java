@@ -136,9 +136,7 @@ public class AdapterFindFriend extends BaseAdapter {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params = new HashMap<>();
                 params.put("Userid1",userid1);
-                params.put("NaUser1",nameu1);
                 params.put("Userid2",userid2);
-                params.put("NaUser2",nameu2);
                 return params;
             }
         };
