@@ -33,6 +33,7 @@
             android:layout_weight="7" />
 
         <Button
+            android:id="@+id/btnFindPath"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginRight="10dp"

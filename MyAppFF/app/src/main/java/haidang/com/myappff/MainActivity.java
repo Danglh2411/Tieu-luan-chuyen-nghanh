@@ -1,9 +1,12 @@
 package haidang.com.myappff;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,40 +38,45 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, LocationListener, OnMapReadyCallback, DirectionFinderListener {
 
 
-    public  static String idfb;
+    public static String idfb;
     public static String namefb;
-    public  String urlphoto;
-    public double Lati;
-    public double Longi;
+    public String urlphoto;
+    public String Lati;
+    public String Longi;
     public String LatiF;
     public String LongiF;
-    public Bitmap theBitmap;
 
     String urlUpdateLocation = "https://apptimnhau.000webhostapp.com/updateLocation.php";
     String urlInsertLocation = "https://apptimnhau.000webhostapp.com/insertLocation.php";
 
     // Of spinner
-    String myurl ="https://apptimnhau.000webhostapp.com/getspinner.php";
+    String myurl = "https://apptimnhau.000webhostapp.com/getspinner.php";
     Spinner spinnerLocation;
     ArrayList<ShareLoaction> arrayUser;
     AdapterSpinner adapter;
@@ -80,6 +89,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Mã yêu cầu uhỏi người dùng cho phép xem vị trí hiện tại của họ (***).
     // Giá trị mã 8bit (value < 256).
     public static final int REQUEST_ID_ACCESS_COURSE_FINE_LOCATION = 100;
+    //Vẽ đường đi
+    private Button btnFindPath;
+
+    private List<Marker> originMarkers = new ArrayList<>();
+    private List<Marker> destinationMarkers = new ArrayList<>();
+    private List<Polyline> polylinePaths = new ArrayList<>();
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,20 +104,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         Bundle bd2 = getIntent().getExtras();
-        if(bd2!=null){
+        if (bd2 != null) {
             LatiF = bd2.getString("Lati");
             LongiF = bd2.getString("Longi");
             idfb = bd2.getString("Userid");
             namefb = bd2.getString("Name");
-            Toast.makeText(MainActivity.this,LatiF+ " : "+ LongiF, Toast.LENGTH_LONG).show();
+            //Toast.makeText(MainActivity.this, LatiF + " : " + LongiF, Toast.LENGTH_LONG).show();
         }
 
         Bundle bd1 = getIntent().getExtras();
-        if(bd1!=null){
+        if (bd1 != null) {
             idfb = bd1.getString("Userid");
             namefb = bd1.getString("Name");
         }
-
 
 
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -109,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AnhXa();
 
         txtUserName.setText(namefb);
-        urlphoto ="https://graph.facebook.com/"+idfb+"/picture?type=large";
+        urlphoto = "https://graph.facebook.com/" + idfb + "/picture?type=large";
         Picasso.with(this)
                 .load(urlphoto)
                 .placeholder(R.drawable.loading)
@@ -117,28 +132,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap);
 
         // Sét đặt sự kiện thời điểm GoogleMap đã sẵn sàng.
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
+        mapFragment.getMapAsync(this);
 
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                onMyMapReady(googleMap);
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         //ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                //this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-       // drawer.setDrawerListener(toggle);
-       // toggle.syncState();
+        //this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        // drawer.setDrawerListener(toggle);
+        // toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         // Spinner
 
         arrayUser = new ArrayList<>();
-        adapter = new AdapterSpinner(MainActivity.this, R.layout.itemspinner,arrayUser,namefb);
+        adapter = new AdapterSpinner(MainActivity.this, R.layout.itemspinner, arrayUser, namefb);
         GetListLocationShare(myurl);
         spinnerLocation.setAdapter(adapter);
+        btnFindPath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendRequest();
+            }
+        });
     }
 
     @Override
@@ -159,23 +174,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_infor) {
-            startActivity(new Intent(this,InfUserActivity.class));
+            Intent mhuser = new Intent(MainActivity.this, InfUserActivity.class);
+            mhuser.putExtra("Userid", idfb);
+            startActivity(mhuser);
         } else if (id == R.id.nav_friend) {
             Intent mh = new Intent(MainActivity.this, ListFriendActivity.class);
             mh.putExtra("Userid", idfb);
             startActivity(mh);
-        }  else if (id == R.id.nav_friendrq) {
+        } else if (id == R.id.nav_friendrq) {
             Intent mhm = new Intent(MainActivity.this, ListFriendRqActivity.class);
             mhm.putExtra("Userid", idfb);
             startActivity(mhm);
 
-        }else if (id == R.id.nav_find_friend) {
+        } else if (id == R.id.nav_find_friend) {
             Intent mhm1 = new Intent(MainActivity.this, FindFriendActivity.class);
             mhm1.putExtra("Userid", idfb);
             mhm1.putExtra("NaUser", namefb);
             startActivity(mhm1);
 
-        }else if (id == R.id.nav_locationrq) {
+        } else if (id == R.id.nav_locationrq) {
             Intent mhm2 = new Intent(MainActivity.this, ListLocationRqActivity.class);
             mhm2.putExtra("Userid", idfb);
             startActivity(mhm2);
@@ -187,14 +204,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-
-
     public void AnhXa() {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
         txtUserName = (TextView) header.findViewById(R.id.tv_name);
         imgUser = (CircleImageView) header.findViewById(R.id.imgUser);
-        spinnerLocation =(Spinner) findViewById(R.id.SpinnerShareLocation);
+        spinnerLocation = (Spinner) findViewById(R.id.SpinnerShareLocation);
+        btnFindPath = (Button) findViewById(R.id.btnFindPath);
+    }
+
+    ////
+    public class PicassoMarker implements Target {
+        Marker mMarker;
+
+        PicassoMarker(Marker marker) {
+            mMarker = marker;
+        }
+
+        @Override
+        public int hashCode() {
+            return mMarker.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof PicassoMarker) {
+                Marker marker = ((PicassoMarker) o).mMarker;
+                return mMarker.equals(marker);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            mMarker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
     }
 
     @Override
@@ -218,38 +272,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    private void onMyMapReady(GoogleMap googleMap) {
-
-        // Lấy đối tượng Google Map ra:
-        myMap = googleMap;
-
-        // Thiết lập sự kiện đã tải Map thành công
-        myMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-
-            @Override
-            public void onMapLoaded() {
-
-                // Đã tải thành công thì tắt Dialog Progress đi
-                // myProgress.dismiss();
-
-                // Hiển thị vị trí người dùng.
-                askPermissionsAndShowMyLocation();
-            }
-        });
-        myMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        myMap.getUiSettings().setZoomControlsEnabled(true);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        myMap.setMyLocationEnabled(true);
-    }
+//    private void onMyMapReady(GoogleMap googleMap) {
+//
+//        // Lấy đối tượng Google Map ra:
+//        myMap = googleMap;
+//
+//        // Thiết lập sự kiện đã tải Map thành công
+//        myMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+//
+//            @Override
+//            public void onMapLoaded() {
+//
+//                // Đã tải thành công thì tắt Dialog Progress đi
+//                // myProgress.dismiss();
+//
+//                // Hiển thị vị trí người dùng.
+//                askPermissionsAndShowMyLocation();
+//            }
+//        });
+//        myMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+//        myMap.getUiSettings().setZoomControlsEnabled(true);
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        myMap.setMyLocationEnabled(true);
+//    }
 
     private void askPermissionsAndShowMyLocation() {
 
@@ -349,7 +403,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
 
         Location myLocation = null;
+
         try {
+
 
             // Đoạn code nay cần người dùng cho phép (Hỏi ở trên ***).
             locationManager.requestLocationUpdates(
@@ -370,8 +426,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (myLocation != null) {
-            Lati = myLocation.getLatitude();
-            Longi = myLocation.getLongitude();
+            Lati = String.valueOf(myLocation.getLatitude());
+            Longi = String.valueOf(myLocation.getLongitude());
             AddLocation(urlInsertLocation);
             UpdateLocation(urlUpdateLocation);
 
@@ -387,10 +443,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             myMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
-
             MarkerOptions marker = new MarkerOptions();
             marker.title(namefb);
-           // marker.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue));
             marker.position(latLng);
             Marker currentMarker = myMap.addMarker(marker);
             currentMarker.showInfoWindow();
@@ -427,8 +482,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("Userid", idfb);
-                params.put("Lati", Double.toString(Lati));
-                params.put("Longi", Double.toString(Longi));
+                params.put("Lati", Lati);
+                params.put("Longi", Lati);
                 return params;
             }
         };
@@ -461,8 +516,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("Userid", idfb);
-                params.put("Lati", Double.toString(Lati));
-                params.put("Longi", Double.toString(Longi));
+                params.put("Lati", Lati);
+                params.put("Longi", Longi);
                 return params;
             }
         };
@@ -471,12 +526,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     // ham get item of spinner
-    private void GetListLocationShare(String url  ){
+    private void GetListLocationShare(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
-            public void onResponse(String  response) {
-                for (int i = 0; i < response.length(); i++){
+            public void onResponse(String response) {
+                for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject jsonobject = new JSONObject(response);
                         JSONArray jsonarray = jsonobject.getJSONArray("friend");
@@ -501,16 +556,129 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
                 error.printStackTrace();
             }
-        })
-        {
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("id",idfb);
-                params.put("Status","2");
+                Map<String, String> params = new HashMap<>();
+                params.put("id", idfb);
+                params.put("Status", "2");
                 return params;
             }
         };
         requestQueue.add(stringRequest);
+    }
+
+    private void sendRequest() {
+        String origin = Lati + "," + Longi;
+        String destination = LatiF + "," + LongiF;
+        if (origin.isEmpty()) {
+            Toast.makeText(this, "Please enter origin address!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (destination.isEmpty()) {
+            Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            new DirectionFinder(this, origin, destination).execute();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // Lấy đối tượng Google Map ra:
+        myMap = googleMap;
+
+        // Thiết lập sự kiện đã tải Map thành công
+        myMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+
+            @Override
+            public void onMapLoaded() {
+
+                // Đã tải thành công thì tắt Dialog Progress đi
+                // myProgress.dismiss();
+
+                // Hiển thị vị trí người dùng.
+                askPermissionsAndShowMyLocation();
+            }
+        });
+        myMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        myMap.getUiSettings().setZoomControlsEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        myMap.setMyLocationEnabled(true);
+    }
+
+    /////
+
+
+    @Override
+    public void onDirectionFinderStart() {
+        progressDialog = ProgressDialog.show(this, "Please wait.",
+                "Finding direction..!", true);
+
+        if (originMarkers != null) {
+            for (Marker marker : originMarkers) {
+                marker.remove();
+            }
+        }
+
+        if (destinationMarkers != null) {
+            for (Marker marker : destinationMarkers) {
+                marker.remove();
+            }
+        }
+
+        if (polylinePaths != null) {
+            for (Polyline polyline : polylinePaths) {
+                polyline.remove();
+            }
+        }
+    }
+
+    @Override
+    public void onDirectionFinderSuccess(List<Route> routes) {
+        progressDialog.dismiss();
+        polylinePaths = new ArrayList<>();
+        originMarkers = new ArrayList<>();
+        destinationMarkers = new ArrayList<>();
+
+
+        for (Route route : routes) {
+            myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.startLocation, 16));
+//            ((TextView) findViewById(R.id.tvDuration)).setText(route.duration.text);
+//            ((TextView) findViewById(R.id.tvDistance)).setText(route.distance.text);
+
+
+            originMarkers.add(myMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue))
+                    .title(route.startAddress)
+                    .position(route.startLocation)));
+            destinationMarkers.add(myMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green))
+                    .title(route.endAddress)
+                    .position(route.endLocation)));
+
+            PolylineOptions polylineOptions = new PolylineOptions().
+                    geodesic(true).
+                    color(Color.BLUE).
+                    width(15);
+
+            for (int i = 0; i < route.points.size(); i++)
+                polylineOptions.add(route.points.get(i));
+
+            polylinePaths.add(myMap.addPolyline(polylineOptions));
+        }
     }
 }

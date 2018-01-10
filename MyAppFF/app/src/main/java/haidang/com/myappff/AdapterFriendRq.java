@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -62,6 +63,7 @@ public class AdapterFriendRq extends BaseAdapter {
     private class ViewHolder{
         TextView txtName;
         Button addFriend;
+        ImageButton deleteFR;
         CircleImageView imgPic;
 
     }
@@ -78,6 +80,7 @@ public class AdapterFriendRq extends BaseAdapter {
             holder.txtName = (TextView) view.findViewById(R.id.txtNameFR);
             holder.imgPic = (CircleImageView) view.findViewById(R.id.imgPicFR);
             holder.addFriend =(Button) view.findViewById(R.id.btnChapNhanFR);
+            holder.deleteFR =(ImageButton) view.findViewById(R.id.btnXoaFR);
             view.setTag(holder);
         }else  {
             holder = (AdapterFriendRq.ViewHolder) view.getTag();
@@ -102,6 +105,15 @@ public class AdapterFriendRq extends BaseAdapter {
                     DeleteFriendRq(urldeleteFriendRq);
                     holder.addFriend.setText("Bạn bè");
                     holder.addFriend.setEnabled(false);
+            }
+        });
+        // Bat su kien cho xóa
+        holder.deleteFR.setOnClickListener(new    View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                userid1 = user.getUserid1();
+                userid2 = user.getUserid2();
+                DeleteFriendRq(urldeleteFriendRq);
             }
         });
         return view;

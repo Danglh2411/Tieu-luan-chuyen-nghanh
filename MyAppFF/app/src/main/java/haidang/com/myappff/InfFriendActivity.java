@@ -2,7 +2,9 @@ package haidang.com.myappff;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,14 +22,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.onesignal.OneSignal;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -60,6 +67,11 @@ public class InfFriendActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inf_friend);
+        //OneSignal
+        OneSignal.startInit(this)
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                .unsubscribeWhenNotificationsAreDisabled(true)
+                .init();
         Bundle bdLF = getIntent().getExtras();
         if(bdLF!=null){
             IdFriend = bdLF.getString("Userid1");
@@ -67,6 +79,8 @@ public class InfFriendActivity extends AppCompatActivity {
             IdUser = bdLF.getString("Userid2");
 
         }
+        //Thi?t l?p thu?c tính Tag trong OneSignal
+        OneSignal.sendTag("User_ID",IdUser);
         Anhxa();
         //getting the progressbar
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -142,7 +156,7 @@ public class InfFriendActivity extends AppCompatActivity {
 
             }
         });
-            /// Xét sự kiện yêu cầu chia sẽ vị trí
+        /// Xét sự kiện yêu cầu chia sẽ vị trí
         YCViTri.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -151,6 +165,7 @@ public class InfFriendActivity extends AppCompatActivity {
                 YCViTri.setText("Chờ xác nhận");
                 YCViTri.setBackgroundResource(R.drawable.style_btn_clicked);
                 YCViTri.setEnabled(false);
+                sendNotification(IdFriend);
 
             }
         });
@@ -236,42 +251,42 @@ public class InfFriendActivity extends AppCompatActivity {
         };
         requestQueue.add(stringRequest);
     }
-/////
-private  void DeleteFriend2 (String url){
-    RequestQueue requestQueue = Volley.newRequestQueue(this);
-    StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    if(response.trim().equals("succ " +
-                            "ess")){
-                        //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
-                    }else
-                    {
-                        //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
+    /////
+    private  void DeleteFriend2 (String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.trim().equals("succ " +
+                                "ess")){
+                            //Toast.makeText(MainActivity.this,"success",Toast.LENGTH_LONG).show();
+                        }else
+                        {
+                            //Toast.makeText(MainActivity.this,"Error!",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
+                        Log.d("AAA","Error:\n" +error.toString());
                     }
                 }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    //Toast.makeText(MainActivity.this,"Error!!!",Toast.LENGTH_LONG).show();
-                    Log.d("AAA","Error:\n" +error.toString());
-                }
+        ){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("Userid1",IdFriend);
+                params.put("Userid2",IdUser);
+                return params;
             }
-    ){
-        @Override
-        protected Map<String, String> getParams() throws AuthFailureError {
-            Map<String,String> params = new HashMap<>();
-            params.put("Userid1",IdFriend);
-            params.put("Userid2",IdUser);
-            return params;
-        }
-    };
-    requestQueue.add(stringRequest);
-}
+        };
+        requestQueue.add(stringRequest);
+    }
 
-/// Gửi yêu cầu chia sẽ vị trí
+    /// Gửi yêu cầu chia sẽ vị trí
     private void UpdateSttLocationRq(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -304,5 +319,74 @@ private  void DeleteFriend2 (String url){
         };
         requestQueue.add(stringRequest);
     }
+    private void sendNotification(final String userIdFriend)
+    {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                int SDK_INT = android.os.Build.VERSION.SDK_INT;
+                if (SDK_INT > 8) {
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                            .permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
 
+
+                    //This is a Simple Logic to Send Notification different Device Programmatically....
+
+
+                    try {
+                        String jsonResponse;
+
+                        URL url = new URL("https://onesignal.com/api/v1/notifications");
+                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                        con.setUseCaches(false);
+                        con.setDoOutput(true);
+                        con.setDoInput(true);
+
+                        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                        con.setRequestProperty("Authorization", "Basic NTZlOTJjZDAtMzAxOS00NTI2LTg4MzctZDBlMWUzMjY5MTEx");
+                        con.setRequestMethod("POST");
+
+                        String strJsonBody = "{"
+                                + "\"app_id\": \"74e1a00d-7240-4836-98f9-990b8f5d30fa\","
+
+                                + "\"filters\": [{\"field\": \"tag\", \"key\": \"User_ID\", \"relation\": \"=\", \"value\": \"" + userIdFriend + "\"}],"
+
+                                + "\"data\": {\"foo\": \"bar\"},"
+                                + "\"contents\": {\"en\": \"Bạn có yêu cầu chia sẻ vị trí\"}"
+                                + "}";
+
+
+                        System.out.println("strJsonBody:\n" + strJsonBody);
+
+                        byte[] sendBytes = strJsonBody.getBytes("UTF-8");
+                        con.setFixedLengthStreamingMode(sendBytes.length);
+
+                        OutputStream outputStream = con.getOutputStream();
+                        outputStream.write(sendBytes);
+
+                        int httpResponse = con.getResponseCode();
+                        System.out.println("httpResponse: " + httpResponse);
+                       // Toast.makeText(InfFriendActivity.this, "Đã gửi yêu cầu", Toast.LENGTH_LONG).show();
+                        if (httpResponse >= HttpURLConnection.HTTP_OK
+                                && httpResponse < HttpURLConnection.HTTP_BAD_REQUEST) {
+                            Scanner scanner = new Scanner(con.getInputStream(), "UTF-8");
+                            jsonResponse = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+                            scanner.close();
+                        } else {
+                            Scanner scanner = new Scanner(con.getErrorStream(), "UTF-8");
+                            jsonResponse = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+                            scanner.close();
+                        }
+                        System.out.println("jsonResponse:\n" + jsonResponse);
+
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+
+            }
+
+        });
+    }
 }

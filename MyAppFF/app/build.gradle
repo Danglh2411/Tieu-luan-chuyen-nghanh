@@ -1,3 +1,13 @@
+//them doan nay
+plugins {
+    id 'com.onesignal.androidsdk.onesignal-gradle-plugin' version '0.7.0'
+}
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
+
+repositories {
+    maven { url 'https://maven.google.com' }
+}
+
 apply plugin: 'com.android.application'
 
 android {
@@ -9,7 +19,13 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+//them cai nay
+        manifestPlaceholders = [onesignal_app_id: "74e1a00d-7240-4836-98f9-990b8f5d30fa",
+                                // Project number pulled from dashboard, local value is ignored.
+                                onesignal_google_project_number: "101626145512"]
     }
     buildTypes {
         release {
@@ -30,8 +46,6 @@ dependencies {
     })
 
 
-
-
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:support-v4:26.+'
     compile 'com.android.support:design:26.+'
@@ -43,4 +57,13 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.bumptech.glide:glide:3.8.0'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:multidex:1.0.0'
+    //them 3 cai nay
+    compile 'com.onesignal:OneSignal:3.+@aar'
+
+    // Required for OneSignal, even if you have added FCM.
+    compile 'com.google.android.gms:play-services-gcm:+'
+
+    // Required for geotagging
+    compile "com.google.android.gms:play-services-location:+"
 }

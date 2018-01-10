@@ -49,8 +49,6 @@ public class LoginActivity extends AppCompatActivity {
         mBtnLoginFacebook = (LoginButton) findViewById(R.id.btn_login_facebook);
         mBtnLoginFacebook.setReadPermissions(Arrays.asList("public_profile"));
         SetLoginButton();
-
-
     }
     private void Result() {
         GraphRequest graphRequest = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
